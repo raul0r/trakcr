@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - creatorLog{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold gradient-text">Project Dashboard</h1>
+        <p class="mt-2 text-gray-400">Track your creative projects and stay motivated</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-dark-blue-800 rounded-lg shadow-lg p-6 border border-dark-blue-700">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-accent-blue-500 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-400 truncate">Total Projects</dt>
+                        <dd class="text-3xl font-bold text-white">{{ total_projects }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-dark-blue-800 rounded-lg shadow-lg p-6 border border-dark-blue-700">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-400 truncate">Completed</dt>
+                        <dd class="text-3xl font-bold text-white">{{ completed_projects }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-dark-blue-800 rounded-lg shadow-lg p-6 border border-dark-blue-700">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                    <dl>
+                        <dt class="text-sm font-medium text-gray-400 truncate">In Progress</dt>
+                        <dd class="text-3xl font-bold text-white">{{ in_progress_projects }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Projects Grid -->
+    {% if projects %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in projects %}
+                <div class="bg-dark-blue-800 rounded-lg shadow-lg border border-dark-blue-700 card-hover">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-white truncate">{{ project.name }}</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                {% if project.status == 'completed' %}bg-green-900 text-green-100
+                                {% elif project.status == 'in_progress' %}bg-yellow-900 text-yellow-100
+                                {% elif project.status == 'planning' %}bg-blue-900 text-blue-100
+                                {% else %}bg-gray-900 text-gray-100{% endif %}">
+                                {{ project.get_status_display }}
+                            </span>
+                        </div>
+                        
+                        {% if project.description %}
+                            <p class="text-gray-400 text-sm mb-4 line-clamp-3">{{ project.description|truncatewords:15 }}</p>
+                        {% endif %}
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-4">
+                            <div class="flex justify-between text-sm text-gray-400 mb-1">
+                                <span>Progress</span>
+                                <span>{{ project.get_progress_percentage }}%</span>
+                            </div>
+                            <div class="w-full bg-dark-blue-700 rounded-full h-2">
+                                <div class="progress-bar h-2 rounded-full transition-all duration-500" style="width: {{ project.get_progress_percentage }}%"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Project Stats -->
+                        <div class="flex justify-between items-center text-sm text-gray-400 mb-4">
+                            <span>{{ project.task_set.count }} tasks</span>
+                            {% if project.due_date %}
+                                <span>Due: {{ project.due_date|date:"M j" }}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Action Button -->
+                        <a href="{% url 'projects:project_detail' project.id %}" 
+                           class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-accent-blue-500 hover:bg-accent-blue-400 transition duration-200">
+                            View Project
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+            <h3 class="mt-2 text-xl font-medium text-gray-300">No projects yet</h3>
+            <p class="mt-1 text-gray-400">Get started by creating your first project.</p>
+            <div class="mt-6">
+                <a href="{% url 'projects:create_project' %}" 
+                   class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-accent-blue-500 hover:bg-accent-blue-400 transition duration-200">
+                    <svg class="-ml-1 mr-3 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                    </svg>
+                    Create Your First Project
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
